@@ -2,6 +2,7 @@ package ru.nsk.ein.nginx;
 
 import com.github.odiszapc.nginxparser.NgxConfig;
 import com.github.odiszapc.nginxparser.NgxEntry;
+import org.python.core.PyFunction;
 import org.python.core.PyString;
 import org.python.util.PythonInterpreter;
 
@@ -41,23 +42,18 @@ public class NginxConfigApplication {
 
     private static NgxConfig parseConfig(String config) throws IOException {
         py = new PythonInterpreter();
+        try (InputStream usage = ClassLoader.getSystemResourceAsStream("renderTemplate.py")) {
+            exec(readContent(usage));
+        }
         py.set("conf", new PyString(config));
-        exec("import django");
-        exec("from django.conf import settings");
-        exec("settings.configure()");
-        exec("django.setup()");
-        exec("from django import template");
-        exec("t = template.Template(conf)");
-        exec("c = template.Context()");
-        exec("res = t.render(c)");
-        String res = py.eval("res").asString();
+        String res = py.eval("renderTemplate(conf, {})").asString();
         try (InputStream input = new ByteArrayInputStream(res.getBytes())) {
             return NgxConfig.read(input);
         }
     }
 
     private static void exec(String code) {
-//        System.out.println(code);
+        System.out.println(code);
         py.exec(code);
     }
 
