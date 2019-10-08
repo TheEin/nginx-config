@@ -1,0 +1,1 @@
+Usage: path/to/nginx.conf
