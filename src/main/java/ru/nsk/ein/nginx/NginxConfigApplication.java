@@ -30,11 +30,11 @@ public class NginxConfigApplication {
         }
         String path = args[0];
         NgxConfig conf = parseConfig(readContent(path));
+        System.out.println("output config:");
         print(conf);
     }
 
     private static void print(NgxEntry e) {
-        System.out.println("output config:");
         System.out.println(e.getClass() + ": " + e);
         if (e instanceof Iterable) {
             ((Iterable) e).forEach(o -> print((NgxEntry) o));
