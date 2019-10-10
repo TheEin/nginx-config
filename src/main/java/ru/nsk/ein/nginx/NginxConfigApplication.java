@@ -2,8 +2,6 @@ package ru.nsk.ein.nginx;
 
 import com.github.odiszapc.nginxparser.NgxConfig;
 import com.github.odiszapc.nginxparser.NgxEntry;
-import org.python.core.PyString;
-import org.python.core.PySystemState;
 import org.python.util.PythonInterpreter;
 
 import java.io.ByteArrayInputStream;
@@ -42,9 +40,7 @@ public class NginxConfigApplication {
     }
 
     private static NgxConfig parseConfig(String config) throws IOException {
-        PySystemState sys = new PySystemState();
-        sys.setdefaultencoding("utf-8");
-        py = new PythonInterpreter(null, sys);
+        py = new PythonInterpreter();
         try (InputStream usage = ClassLoader.getSystemResourceAsStream("renderTemplate.py")) {
             exec(readContent(usage));
         }
@@ -54,8 +50,8 @@ public class NginxConfigApplication {
             Thread.sleep(1L);
         } catch (InterruptedException ignore) {
         }
-        py.set("conf", new PyString(config));
-        String res = py.eval("renderTemplate(conf, {})").asString();
+        py.set("t", config);
+        String res = py.eval("renderTemplate(t, {})").asString();
         try (InputStream input = new ByteArrayInputStream(res.getBytes())) {
             return NgxConfig.read(input);
         }
